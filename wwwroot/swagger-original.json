@@ -1,0 +1,464 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "This specification defines the APIs for a TPP to submit a Software Statement Assertion to an ASPSP for the purpose of creating OAuth clients that are registered with ASPSP.\n",
+    "version" : "v3.1-RC1",
+    "title" : "Dynamic Client Registration API",
+    "termsOfService" : "https://www.openbanking.org.uk/terms",
+    "contact" : {
+      "name" : "Service Desk",
+      "email" : "ServiceDesk@openbanking.org.uk"
+    },
+    "license" : {
+      "name" : "open-licence",
+      "url" : "https://www.openbanking.org.uk/open-licence"
+    }
+  },
+  "schemes" : [ "https" ],
+  "consumes" : [ "application/jwt" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/register" : {
+      "post" : {
+        "tags" : [ "Client Registration", "Conditional" ],
+        "summary" : "Register a client by way of a Software Statement Assertion",
+        "description" : "Endpoint will be secured by way of Mutual Authentication over TLS",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "requestBody",
+          "description" : "A request to register a Software Statement Assertion with an ASPSP",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "OBClientRegistration1"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Client registration",
+            "schema" : {
+              "allOf" : [ {
+                "$ref" : "#/definitions/OBRegistrationProperties1"
+              }, { } ]
+            }
+          },
+          "400" : {
+            "description" : "Request failed due to client error",
+            "schema" : {
+              "$ref" : "#/definitions/RegistrationError"
+            }
+          }
+        }
+      }
+    },
+    "/register/{ClientId}" : {
+      "get" : {
+        "tags" : [ "Client Registration", "Optional" ],
+        "summary" : "Get a client by way of Client ID",
+        "parameters" : [ {
+          "name" : "ClientId",
+          "in" : "path",
+          "description" : "The client ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "An Authorisation Token as per https://tools.ietf.org/html/rfc6750",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Client registration",
+            "schema" : {
+              "allOf" : [ {
+                "$ref" : "#/definitions/OBRegistrationProperties1"
+              }, { } ]
+            }
+          },
+          "401" : {
+            "description" : "Request failed due to unknown or invalid Client or invalid access token",
+            "headers" : {
+              "WWW-Authenticate" : {
+                "type" : "string",
+                "description" : "Response header field specified in https://tools.ietf.org/html/rfc6750",
+                "pattern" : "^Bearer .*"
+              }
+            }
+          },
+          "403" : {
+            "description" : "The client does not have permission to read, update or delete the Client"
+          }
+        },
+        "security" : [ {
+          "TPPOAuth2Security" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Client Registration", "Optional" ],
+        "summary" : "Update a client by way of Client ID",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "requestBody",
+          "description" : "A request to register a Software Statement Assertion with an ASPSP",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "OBClientRegistration1"
+          }
+        }, {
+          "name" : "ClientId",
+          "in" : "path",
+          "description" : "The client ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "An Authorisation Token as per https://tools.ietf.org/html/rfc6750",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Client registration",
+            "schema" : {
+              "allOf" : [ {
+                "$ref" : "#/definitions/OBRegistrationProperties1"
+              }, { } ]
+            }
+          },
+          "400" : {
+            "description" : "Request failed due to client error",
+            "schema" : {
+              "$ref" : "#/definitions/RegistrationError"
+            }
+          },
+          "401" : {
+            "description" : "Request failed due to unknown or invalid Client or invalid access token",
+            "headers" : {
+              "WWW-Authenticate" : {
+                "type" : "string",
+                "description" : "Response header field specified in https://tools.ietf.org/html/rfc6750",
+                "pattern" : "^Bearer .*"
+              }
+            }
+          },
+          "403" : {
+            "description" : "The client does not have permission to read, update or delete the Client"
+          }
+        },
+        "security" : [ {
+          "TPPOAuth2Security" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Client Registration", "Optional" ],
+        "summary" : "Delete a client by way of Client ID",
+        "parameters" : [ {
+          "name" : "ClientId",
+          "in" : "path",
+          "description" : "The client ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "An Authorisation Token as per https://tools.ietf.org/html/rfc6750",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Client deleted"
+          },
+          "401" : {
+            "description" : "Request failed due to unknown or invalid Client or invalid access token",
+            "headers" : {
+              "WWW-Authenticate" : {
+                "type" : "string",
+                "description" : "Response header field specified in https://tools.ietf.org/html/rfc6750",
+                "pattern" : "^Bearer .*"
+              }
+            }
+          },
+          "403" : {
+            "description" : "The client does not have permission to read, update or delete the Client"
+          },
+          "405" : {
+            "description" : "The client does not have permission to read, update or delete the Client"
+          }
+        },
+        "security" : [ {
+          "TPPOAuth2Security" : [ ]
+        } ]
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "TPPOAuth2Security" : {
+      "description" : "TPP client credential authorisation flow with the ASPSP. No scopes defined as per specification",
+      "type" : "oauth2",
+      "tokenUrl" : "https://authserver.example/token",
+      "flow" : "application"
+    }
+  },
+  "definitions" : {
+    "SupportedAlgorithms" : {
+      "type" : "string",
+      "enum" : [ "RS256", "PS256", "ES256" ],
+      "x-enum-string" : true
+    },
+    "OBRegistrationProperties1" : {
+      "type" : "object",
+      "required" : [ "application_type", "grant_types", "id_token_signed_response_alg", "redirect_uris", "request_object_signing_alg", "software_statement", "tls_client_auth_dn", "token_endpoint_auth_method" ],
+      "properties" : {
+        "client_id" : {
+          "type" : "string",
+          "description" : "OAuth 2.0 client identifier string",
+          "minLength" : 1,
+          "maxLength" : 36
+        },
+        "client_secret" : {
+          "type" : "string",
+          "description" : "OAuth 2.0 client secret string",
+          "minLength" : 1,
+          "maxLength" : 36
+        },
+        "client_id_issued_at" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "Time at which the client identifier was issued expressed as seconds since 1970-01-01T00:00:00Z as measured in UTC",
+          "minimum" : 0
+        },
+        "client_secret_expires_at" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "Time at which the client secret will expire expressed as seconds since 1970-01-01T00:00:00Z as measured in UTC. Set to 0 if does not expire",
+          "minimum" : 0
+        },
+        "redirect_uris" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "format" : "uri",
+            "minLength" : 1,
+            "maxLength" : 256
+          }
+        },
+        "token_endpoint_auth_method" : {
+          "type" : "string",
+          "enum" : [ "private_key_jwt", "tls_client_auth" ]
+        },
+        "grant_types" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "enum" : [ "client_credentials", "authorization_code", "refresh_token" ]
+          },
+          "minItems" : 1
+        },
+        "response_types" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "enum" : [ "code", "code id_token" ]
+          }
+        },
+        "software_id" : {
+          "type" : "string"
+        },
+        "scope" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "minLength" : 1,
+            "maxLength" : 32
+          }
+        },
+        "software_statement" : {
+          "type" : "string",
+          "format" : "JWT"
+        },
+        "application_type" : {
+          "type" : "string",
+          "enum" : [ "web", "mobile" ]
+        },
+        "id_token_signed_response_alg" : {
+          "$ref" : "#/definitions/SupportedAlgorithms"
+        },
+        "request_object_signing_alg" : {
+          "$ref" : "#/definitions/SupportedAlgorithms"
+        },
+        "token_endpoint_auth_signing_alg" : {
+          "$ref" : "#/definitions/SupportedAlgorithms"
+        },
+        "tls_client_auth_dn" : {
+          "type" : "string",
+          "minLength" : 1,
+          "maxLength" : 128
+        }
+      },
+      "example" : {
+        "tls_client_auth_dn" : "tls_client_auth_dn",
+        "token_endpoint_auth_signing_alg" : null,
+        "grant_types" : [ "client_credentials", "client_credentials" ],
+        "application_type" : "web",
+        "redirect_uris" : [ "http://example.com/aeiou", "http://example.com/aeiou" ],
+        "client_id" : "client_id",
+        "token_endpoint_auth_method" : "private_key_jwt",
+        "software_id" : "software_id",
+        "software_statement" : "software_statement",
+        "client_secret_expires_at" : 0,
+        "scope" : [ "scope", "scope" ],
+        "client_secret" : "client_secret",
+        "client_id_issued_at" : 0,
+        "request_object_signing_alg" : null,
+        "response_types" : [ "code", "code" ],
+        "id_token_signed_response_alg" : { }
+      }
+    },
+    "OBClientRegistration1" : {
+      "allOf" : [ {
+        "type" : "object",
+        "required" : [ "aud", "exp", "iat", "iss", "jti" ],
+        "properties" : {
+          "iss" : {
+            "type" : "string",
+            "description" : "Unique identifier for the TPP. Implemented as Base62 encoded GUID",
+            "minLength" : 1,
+            "maxLength" : 18,
+            "pattern" : "^[0-9a-zA-Z]{1,18}$"
+          },
+          "iat" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "The time at which the request was issued by the TPP  expressed as seconds since 1970-01-01T00:00:00Z as measured in UTC"
+          },
+          "exp" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "The time at which the request expires expressed as seconds since 1970-01-01T00:00:00Z as measured in UTC"
+          },
+          "aud" : {
+            "type" : "string",
+            "description" : "The audience for the request. This should be the unique identifier\nfor the ASPSP issued by the issuer of the software statement.\nImplemented as Base62 encoded GUID\n",
+            "minLength" : 1,
+            "maxLength" : 18,
+            "pattern" : "^[0-9a-zA-Z]{1,18}$"
+          },
+          "jti" : {
+            "type" : "string",
+            "description" : "Unique identifier for the JWT implemented as UUID v4",
+            "minLength" : 36,
+            "maxLength" : 36,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          }
+        }
+      }, {
+        "$ref" : "#/definitions/OBRegistrationProperties1"
+      } ]
+    },
+    "RegistrationError" : {
+      "type" : "object",
+      "required" : [ "error" ],
+      "properties" : {
+        "error" : {
+          "type" : "string",
+          "enum" : [ "invalid_redirect_uri", "invalid_client_metadata", "invalid_software_statement", "unapproved_software_statement" ]
+        },
+        "error_description" : {
+          "type" : "string",
+          "minLength" : 1,
+          "maxLength" : 500
+        }
+      }
+    },
+    "inline_response_201" : {
+      "properties" : {
+        "OBRegistrationProperties1" : {
+          "$ref" : "#/definitions/OBRegistrationProperties1"
+        }
+      },
+      "example" : {
+        "OBRegistrationProperties1" : {
+          "tls_client_auth_dn" : "tls_client_auth_dn",
+          "token_endpoint_auth_signing_alg" : null,
+          "grant_types" : [ "client_credentials", "client_credentials" ],
+          "application_type" : "web",
+          "redirect_uris" : [ "http://example.com/aeiou", "http://example.com/aeiou" ],
+          "client_id" : "client_id",
+          "token_endpoint_auth_method" : "private_key_jwt",
+          "software_id" : "software_id",
+          "software_statement" : "software_statement",
+          "client_secret_expires_at" : 0,
+          "scope" : [ "scope", "scope" ],
+          "client_secret" : "client_secret",
+          "client_id_issued_at" : 0,
+          "request_object_signing_alg" : null,
+          "response_types" : [ "code", "code" ],
+          "id_token_signed_response_alg" : { }
+        }
+      }
+    }
+  },
+  "parameters" : {
+    "Authorization" : {
+      "name" : "Authorization",
+      "in" : "header",
+      "description" : "An Authorisation Token as per https://tools.ietf.org/html/rfc6750",
+      "required" : true,
+      "type" : "string"
+    },
+    "ClientId" : {
+      "name" : "ClientId",
+      "in" : "path",
+      "description" : "The client ID",
+      "required" : true,
+      "type" : "string"
+    },
+    "ClientRegistration" : {
+      "in" : "body",
+      "name" : "requestBody",
+      "description" : "A request to register a Software Statement Assertion with an ASPSP",
+      "required" : false,
+      "schema" : {
+        "type" : "string",
+        "format" : "OBClientRegistration1"
+      }
+    }
+  },
+  "responses" : {
+    "400Error" : {
+      "description" : "Request failed due to client error",
+      "schema" : {
+        "$ref" : "#/definitions/RegistrationError"
+      }
+    },
+    "401Error" : {
+      "description" : "Request failed due to unknown or invalid Client or invalid access token",
+      "headers" : {
+        "WWW-Authenticate" : {
+          "type" : "string",
+          "description" : "Response header field specified in https://tools.ietf.org/html/rfc6750",
+          "pattern" : "^Bearer .*"
+        }
+      }
+    },
+    "403Error" : {
+      "description" : "The client does not have permission to read, update or delete the Client"
+    },
+    "405Error" : {
+      "description" : "Method Not Allowed"
+    },
+    "OBClientRegistration1" : {
+      "description" : "Client registration",
+      "schema" : {
+        "allOf" : [ {
+          "$ref" : "#/definitions/OBRegistrationProperties1"
+        }, { } ]
+      }
+    }
+  }
+}
